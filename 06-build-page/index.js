@@ -2,20 +2,19 @@ const fs = require('fs');
 const fsPromises = require('fs/promises')
 const path = require ('path');
 
-//todo ПУТИ
-
 const srcTemplate = path.join(__dirname, 'template.html')
 const srcHtmlComp = path.join(__dirname, 'components');
 const srcCSS = path.join(__dirname, 'styles');
 const srcAssets = path.join(__dirname, 'assets');
 const destPass = path.join(__dirname, 'project-dist');
-
+const destAssets = path.join(destPass, 'assets')
 
 async function createdDirDest() {
          await fsPromises.mkdir(destPass, {recursive: true});
          await fsPromises.copyFile(srcTemplate, path.join(destPass, 'index.html'));
      }
-createdDirDest()
+createdDirDest();
+
 async function readTemplate() {
     const compNamesExt = await fsPromises.readdir(srcHtmlComp); //  массив с полным именем файлов компонентов
     const compNames = compNamesExt.map((file) => file.split('.')[0]) //  массив с именами файлов компонентов
@@ -28,7 +27,7 @@ async function readTemplate() {
         }
     }
 }
-readTemplate()
+readTemplate();
 
 const wStream = fs.createWriteStream(path.join(destPass, 'style.css'))
 fs.readdir(srcCSS, { withFileTypes: true }, (err, files) => {
@@ -40,5 +39,31 @@ fs.readdir(srcCSS, { withFileTypes: true }, (err, files) => {
         const rStream = fs.createReadStream(path.join(srcCSS, `${file.name}`))
         rStream.on('data', (data) => wStream.write(data.toString()))
     })
-    console.log('Сборка завершена!')
 })
+
+fs.mkdir(destAssets, {recursive: true}, (err) => {
+    if(err) return console.log(err);
+})
+
+function copy(directory, destAssets) {
+    fs.readdir(directory, (err, files) => {
+        if (err) return console.log(err);
+        files.forEach((file) => {
+            const filePath = path.join(directory, file);
+            fs.stat(filePath, (err, stats) => {
+                if (err) return console.log(err);
+                if (stats.isDirectory()) {
+                    fs.mkdir(path.join(destAssets, file), { recursive: true}, (err) => {
+                        if (err) console.log(err);
+                        copy(filePath, path.join(destAssets, file));
+                    });
+                } else {
+                    fs.copyFile(filePath, path.join(destAssets, file), (err) => {
+                        if (err) console.log(err);
+                    });
+                }
+            });
+        });
+    });
+}
+copy(srcAssets, destAssets);
