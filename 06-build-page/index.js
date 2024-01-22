@@ -10,11 +10,12 @@ const srcCSS = path.join(__dirname, 'styles');
 const srcAssets = path.join(__dirname, 'assets');
 const destPass = path.join(__dirname, 'project-dist');
 
+
 async function createdDirDest() {
          await fsPromises.mkdir(destPass, {recursive: true});
          await fsPromises.copyFile(srcTemplate, path.join(destPass, 'index.html'));
      }
-    createdDirDest()
+createdDirDest()
 async function readTemplate() {
     const compNamesExt = await fsPromises.readdir(srcHtmlComp); //  массив с полным именем файлов компонентов
     const compNames = compNamesExt.map((file) => file.split('.')[0]) //  массив с именами файлов компонентов
@@ -28,3 +29,16 @@ async function readTemplate() {
     }
 }
 readTemplate()
+
+const wStream = fs.createWriteStream(path.join(destPass, 'style.css'))
+fs.readdir(srcCSS, { withFileTypes: true }, (err, files) => {
+    if (err) return console.log(err);
+    const correctFiles = files.filter((file) => {
+        return file.name.includes('.css') && file.isFile(); 
+    })
+    correctFiles.forEach((file) => {
+        const rStream = fs.createReadStream(path.join(srcCSS, `${file.name}`))
+        rStream.on('data', (data) => wStream.write(data.toString()))
+    })
+    console.log('Сборка завершена!')
+})
