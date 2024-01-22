@@ -15,18 +15,16 @@ async function createdDirDest() {
          await fsPromises.copyFile(srcTemplate, path.join(destPass, 'index.html'));
      }
     createdDirDest()
-
-
- async function readTemplate() {
-    const templateFile = await fsPromises.readFile(srcTemplate, {encoding: 'utf8'}); // Приходит текст HTML шаблона
+async function readTemplate() {
     const compNamesExt = await fsPromises.readdir(srcHtmlComp); //  массив с полным именем файлов компонентов
     const compNames = compNamesExt.map((file) => file.split('.')[0]) //  массив с именами файлов компонентов
-    let buidHtml = await fsPromises.readFile(path.join(destPass, 'index.html'), {encoding: 'utf8'}); // ПУТЬ К ИТОГОВОМУ ФАЙЛУ
     let copyTemplate = await fsPromises.readFile(srcTemplate, {encoding: 'utf8'});
-    for (const file of compNames) {
-            const textComponents = await fsPromises.readFile(path.join(srcHtmlComp, `${file}.html`), {encoding: 'utf8'});
-            copyTemplate = copyTemplate.replace(`{{${file}}}`, `${textComponents}`);
-            await fsPromises.writeFile(path.join(destPass, 'index.html'), copyTemplate);
+    for (let i = 0; i < compNames.length; i += 1) {
+        const textComponents = await fsPromises.readFile(path.join(srcHtmlComp, `${compNames[i]}.html`), {encoding: 'utf8'});
+        copyTemplate = copyTemplate.replace(`{{${compNames[i]}}}`, `${textComponents}`);
+        if (i === compNames.length - 1) {
+                await fsPromises.writeFile((path.join(destPass, 'index.html')), copyTemplate);
+        }
     }
 }
 readTemplate()
