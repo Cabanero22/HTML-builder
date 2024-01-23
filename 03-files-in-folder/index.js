@@ -10,7 +10,7 @@ const correctPath = path.join(__dirname, "secret-folder");
   }
   const files = elements.filter((element) => element.isFile());
   files.forEach((file) => {
-    const fileName = file.name.split('.')[0];
+    const fileName = path.parse(path.join(correctPath, file.name)).name;
     const ext = path.extname(file.name).replace('.', '');
     fs.stat(path.join(correctPath, `${file.name}`), (err, stats) => {
       if (err) { 
