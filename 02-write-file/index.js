@@ -1,19 +1,35 @@
-const path = require ("path");
-const fs = require("fs");
-const {stdin, stdout, exit} = process;
+const path = require('path');
+const fsPromises = require('fs/promises');
+const { stdin, stdout, exit } = process;
 
-const wStream = fs.createWriteStream(path.join(__dirname, "02-write-file.txt"));
-stdout.write("Приветствую, кожаный! Прошу ввести текст:\n");
-const bye = "Прощай, кожаный!";
+const createFile = async (fileName) => {
+  await fsPromises.writeFile(fileName, '');
+};
 
-stdin.on("data", (data) => {
-    if (data.toString().includes("exit")) {
-        stdout.write(bye);
+const writeFile = async (fileName, data) => {
+  await fsPromises.appendFile(fileName, data);
+};
+
+const start = async () => {
+  try {
+    const byeMassage = '\nGood bye, human!';
+    const fileName = path.join(__dirname, 'very-secret-file.txt');
+    await createFile(fileName);
+    stdout.write('Hello, human! You can write your text below:\n');
+    process.on('SIGINT', () => {
+      stdout.write(byeMassage);
+      exit();
+    });
+    stdin.on('data', async (data) => {
+      if (data.toString().toLowerCase().trim() === 'exit') {
+        stdout.write(byeMassage);
         exit();
-    }
-    wStream.write(data);
-})
-process.on("SIGINT", () => {
-    stdout.write(bye);
-    exit();
-});
+      } else {
+        await writeFile(fileName, data);
+      }
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+start();
