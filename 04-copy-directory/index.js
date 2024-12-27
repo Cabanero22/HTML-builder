@@ -13,7 +13,7 @@ const clearCopyDir = async (dirPath) => {
   }
 };
 
-const readDir = async () => {
+const copyDir = async () => {
   const filesPass = path.join(__dirname, 'files');
   const filesCopyPass = path.join(__dirname, 'files-copy');
   await makeDir(filesCopyPass);
@@ -25,4 +25,4 @@ const readDir = async () => {
     await fs.copyFile(srcFile, destFile);
   }
 };
-readDir();
+copyDir();
