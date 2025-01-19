@@ -1,20 +1,17 @@
-const fs = require('fs');
+const fs = require('fs/promises');
 const path = require('path');
 
-const destPass = path.join(__dirname, 'project-dist');
-const sourcePass = path.join(__dirname, 'styles');
-const wStream = fs.createWriteStream(path.join(destPass, 'bundle.css'));
-
-fs.readdir(sourcePass, { withFileTypes: true }, (err, files) => {
-  if (err) return console.log(err);
-
-  const correctFiles = files.filter((file) => {
-    return file.name.includes('.css') && file.isFile();
-  });
-
-  correctFiles.forEach((file) => {
-    const rStream = fs.createReadStream(path.join(sourcePass, `${file.name}`));
-    rStream.on('data', (data) => wStream.write(data.toString()));
-  });
-  console.log('Сборка завершена!');
-});
+const mergeStyles = async () => {
+  const sourcePath = path.join(__dirname, 'styles');
+  const destPath = path.join(__dirname, 'project-dist');
+  await fs.writeFile(path.join(destPath, 'bundle.css'), '');
+  const folderContent = await fs.readdir(sourcePath);
+  for (const item of folderContent) {
+    if (path.extname(item) === '.css') {
+      const content = await fs.readFile(path.join(sourcePath, item));
+      await fs.appendFile(path.join(destPath, 'bundle.css'), content);
+    }
+  }
+  console.log('Bundle complete!');
+};
+mergeStyles();

@@ -14,14 +14,14 @@ const clearCopyDir = async (dirPath) => {
 };
 
 const copyDir = async () => {
-  const filesPass = path.join(__dirname, 'files');
-  const filesCopyPass = path.join(__dirname, 'files-copy');
-  await makeDir(filesCopyPass);
-  await clearCopyDir(filesCopyPass);
-  const filesArr = await fs.readdir(filesPass);
+  const filesPath = path.join(__dirname, 'files');
+  const filesCopyPath = path.join(__dirname, 'files-copy');
+  await makeDir(filesCopyPath);
+  await clearCopyDir(filesCopyPath);
+  const filesArr = await fs.readdir(filesPath);
   for (const file of filesArr) {
-    const srcFile = path.join(filesPass, file);
-    const destFile = path.join(filesCopyPass, file);
+    const srcFile = path.join(filesPath, file);
+    const destFile = path.join(filesCopyPath, file);
     await fs.copyFile(srcFile, destFile);
   }
 };
